@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "folco",
+  "productName": "folco-gui",
   "version": "0.1.0",
-  "identifier": "com.ecoates2.folco",
+  "identifier": "com.ecoates2.folco-gui",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
