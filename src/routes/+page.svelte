@@ -1,78 +1,72 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button/index.js";
-  import * as EmojiPicker from '$lib/components/ui/emoji-picker';
-  import * as Resizable from "$lib/components/ui/resizable/index.js";
+  import { DirectoryPicker } from '$lib/components/app/directory-picker';
 
-  import { invoke } from "@tauri-apps/api/core";
+  // For now, we'll use a mock for the dialog
+  // Once you install @tauri-apps/plugin-dialog, uncomment the import below
+  // import { open } from '@tauri-apps/plugin-dialog';
 
-  let name = $state("");
-  let greetMsg = $state("");
+  let directories = $state<string[]>([]);
+  let selectedIndex = $state<number | null>(null);
 
-  async function greet(event: Event) {
-    event.preventDefault();
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsg = await invoke("greet", { name });
+  async function handleAdd() {
+    // Mock implementation - replace with actual Tauri dialog once plugin is installed
+    // const selected = await open({
+    //   directory: true,
+    //   multiple: true,
+    //   title: 'Select Folder(s)'
+    // });
+    //
+    // if (selected) {
+    //   const paths = Array.isArray(selected) ? selected : [selected];
+    //   directories = [...directories, ...paths.filter(p => !directories.includes(p))];
+    // }
+
+    // Placeholder for testing without the plugin
+    const mockPath = `/home/user/folder-${directories.length + 1}`;
+    if (!directories.includes(mockPath)) {
+      directories = [...directories, mockPath];
+    }
+  }
+
+  function handleRemove(index: number) {
+    directories = directories.filter((_, i) => i !== index);
+    selectedIndex = null;
+  }
+
+  function handleClearAll() {
+    directories = [];
+    selectedIndex = null;
+  }
+
+  function handleDropPaths(paths: string[]) {
+    // Filter out duplicates
+    const newPaths = paths.filter(p => !directories.includes(p));
+    directories = [...directories, ...newPaths];
   }
 </script>
 
-<Resizable.PaneGroup direction="horizontal" class="max-w-md rounded-lg border">
-  <Resizable.Pane defaultSize={50}>
-    <div class="flex h-50 items-center justify-center p-6">
-      <span class="font-semibold">One</span>
-    </div>
-  </Resizable.Pane>
-  <Resizable.Handle />
-  <Resizable.Pane defaultSize={50}>
-    <Resizable.PaneGroup direction="vertical">
-      <Resizable.Pane defaultSize={25}>
-        <div class="flex h-full items-center justify-center p-6">
-          <span class="font-semibold">Two</span>
-        </div>
-      </Resizable.Pane>
-      <Resizable.Handle />
-      <Resizable.Pane defaultSize={75}>
-        <div class="flex h-full items-center justify-center p-6">
-          <span class="font-semibold">Three</span>
-        </div>
-      </Resizable.Pane>
-    </Resizable.PaneGroup>
-  </Resizable.Pane>
-</Resizable.PaneGroup>
+<main class="container mx-auto max-w-2xl p-6">
+  <h1 class="mb-6 text-2xl font-bold text-foreground">Folder Customization</h1>
 
-<main class="container">
-  <h1>Welcome to Tauri + Svelte</h1>
+  <DirectoryPicker
+    bind:directories
+    bind:selectedIndex
+    onAdd={handleAdd}
+    onRemove={handleRemove}
+    onClearAll={handleClearAll}
+    onDropPaths={handleDropPaths}
+    class="max-w-md"
+  />
 
-  <Button>Click me</Button>
-
-<!-- <EmojiPicker.Root onSelect={(selected) => console.log('Selected emoji:', selected)}>
-	<EmojiPicker.Viewport>
-		<EmojiPicker.Search />
-		<EmojiPicker.List />
-	</EmojiPicker.Viewport>
-</EmojiPicker.Root> -->
-
-  <!-- <div class="row">
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte-kit" alt="SvelteKit Logo" />
-    </a>
+  <!-- Debug output -->
+  <div class="mt-6 rounded-md border border-border bg-muted/50 p-4">
+    <p class="text-sm text-muted-foreground">
+      Selected directories: {directories.length}
+    </p>
+    <p class="text-sm text-muted-foreground">
+      Selected index: {selectedIndex ?? 'none'}
+    </p>
   </div>
-  <p>Click on the Tauri, Vite, and SvelteKit logos to learn more.</p> -->
-
-  <!-- <h1 class="text-3xl font-bold underline">
-  Hello world!
-  </h1> -->
-
-  <form class="row" onsubmit={greet}>
-    <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
-    <button type="submit">Greet</button>
-  </form>
-  <p>{greetMsg}</p>
 </main>
 
 <style lang="postcss">
