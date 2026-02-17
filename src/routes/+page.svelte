@@ -1,30 +1,24 @@
 <script lang="ts">
+
   import { DirectoryPicker } from '$lib/components/app/directory-picker';
 
-  // For now, we'll use a mock for the dialog
-  // Once you install @tauri-apps/plugin-dialog, uncomment the import below
-  // import { open } from '@tauri-apps/plugin-dialog';
+  import 'iconify-picker';
+
+  import { open } from '@tauri-apps/plugin-dialog';
 
   let directories = $state<string[]>([]);
   let selectedIndex = $state<number | null>(null);
 
   async function handleAdd() {
-    // Mock implementation - replace with actual Tauri dialog once plugin is installed
-    // const selected = await open({
-    //   directory: true,
-    //   multiple: true,
-    //   title: 'Select Folder(s)'
-    // });
-    //
-    // if (selected) {
-    //   const paths = Array.isArray(selected) ? selected : [selected];
-    //   directories = [...directories, ...paths.filter(p => !directories.includes(p))];
-    // }
+    const selected = await open({
+      directory: true,
+      multiple: true,
+      title: 'Select Folder(s)'
+    });
 
-    // Placeholder for testing without the plugin
-    const mockPath = `/home/user/folder-${directories.length + 1}`;
-    if (!directories.includes(mockPath)) {
-      directories = [...directories, mockPath];
+    if (selected) {
+      const paths = Array.isArray(selected) ? selected : [selected];
+      directories = [...directories, ...paths.filter(p => !directories.includes(p))];
     }
   }
 
@@ -47,6 +41,13 @@
 
 <main class="container mx-auto max-w-2xl p-6">
   <h1 class="mb-6 text-2xl font-bold text-foreground">Folder Customization</h1>
+
+  <iconify-picker
+    collection="heroicons"
+    hide-search
+    hide-collection
+    page-size="30">
+  </iconify-picker>
 
   <DirectoryPicker
     bind:directories

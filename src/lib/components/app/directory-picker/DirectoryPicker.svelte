@@ -3,6 +3,8 @@
 	import { cn } from '$lib/utils';
 	import FolderIcon from '@lucide/svelte/icons/folder';
 	import XIcon from '@lucide/svelte/icons/x';
+	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		directories: string[];
@@ -28,46 +30,26 @@
 
 	let isDragging = $state(false);
 
-	function handleDragOver(event: DragEvent) {
-		event.preventDefault();
-		isDragging = true;
-	}
-
-	function handleDragLeave(event: DragEvent) {
-		event.preventDefault();
-		isDragging = false;
-	}
-
-	async function handleDrop(event: DragEvent) {
-		event.preventDefault();
-		isDragging = false;
-
-		// Handle file drops from the system
-		const items = event.dataTransfer?.items;
-		if (!items) return;
-
-		const paths: string[] = [];
-
-		for (const item of items) {
-			if (item.kind === 'file') {
-				const file = item.getAsFile();
-				// In Tauri, we can get the path from the file
-				// The webkitRelativePath or using Tauri's drag-drop plugin
-				if (file) {
-					// For now, we'll use the file name as a placeholder
-					// The actual path handling will be done via Tauri's drag-drop events
-					paths.push(file.name);
+	onMount(() => {
+		const appWindow = getCurrentWebviewWindow();
+		const unlisten = appWindow.onDragDropEvent((event) => {
+			if (event.payload.type === 'over') {
+				isDragging = true;
+			} else if (event.payload.type === 'leave') {
+				isDragging = false;
+			} else if (event.payload.type === 'drop') {
+				isDragging = false;
+				const paths = event.payload.paths;
+				if (paths.length > 0 && onDropPaths) {
+					onDropPaths(paths);
 				}
 			}
-		}
+		});
 
-		// Note: For proper file path access from system drag/drop,
-		// you'll want to use @tauri-apps/plugin-drag-drop or handle it via Tauri events
-		// This is a placeholder for the drop zone visual behavior
-		if (paths.length > 0 && onDropPaths) {
-			onDropPaths(paths);
-		}
-	}
+		return () => {
+			unlisten.then((fn) => fn());
+		};
+	});
 
 	function handleItemClick(index: number) {
 		selectedIndex = index;
@@ -97,9 +79,6 @@
 		role="listbox"
 		tabindex="0"
 		aria-label="Selected directories"
-		ondragover={handleDragOver}
-		ondragleave={handleDragLeave}
-		ondrop={handleDrop}
 		class={cn(
 			'min-h-40 rounded-md border-2 border-dashed bg-background p-2 transition-colors',
 			isDragging
