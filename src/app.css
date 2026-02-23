@@ -117,6 +117,15 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Disable text selection globally for a native app feel.
+       Re-enabled below for interactive text elements. */
+    user-select: none;
+  }
+  /* Allow text selection in inputs, textareas, and contenteditable areas */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    user-select: text;
   }
 }
 

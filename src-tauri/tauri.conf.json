@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "folco",
+        "title": "Folco",
         "width": 800,
         "height": 600
       }
